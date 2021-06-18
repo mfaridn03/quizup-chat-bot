@@ -37,30 +37,23 @@ class Message(dict):
     def __init__(self, message):
         super().__init__()
         self.content: str = message['last_message']['text']
-        self.sender: str = message['player']['id']
+        self.sender: Sender = Sender(message['player']['id'])
         self.read: bool = message['last_message']['read']
-
-    def __repr__(self):
-        return self
-
-    def __bool__(self):
-        return True
 
     async def process_command(self):
         command = self.content.split('a!')[1:]
         cmd_name = command[0].split(' ')[0].lower()  # Lmao
-        sender = Sender(self.sender)
         print(self.sender, "triggered", cmd_name)
 
         if cmd_name == 'ping':
-            await commands.command_ping(sender)
+            await commands.command_ping(self.sender)
 
         elif cmd_name == 'mystats':
-            await commands.my_stats(sender)
+            await commands.my_stats(self.sender)
 
         elif cmd_name == 'topicstats':
             topic_slug = command[0].split(' ')[1].lower()
-            await commands.my_topic_stats(sender, topic_slug)
+            await commands.my_topic_stats(self.sender, topic_slug)
 
     async def close(self):
         url = "https://www.quizup.com/api/chat/" + self.sender
